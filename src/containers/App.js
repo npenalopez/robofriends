@@ -1,28 +1,33 @@
-import React, {useEffect, useState, forwardRef} from 'react';
+import React, {useEffect, useState} from 'react';
+import { connect } from 'react-redux';
 import SearchBox from '../components/SearchBox';
 import CardList from '../components/CardList';
 import Scroll from '../components/Scroll';
 import ErrorBoundry from '../components/ErrorBoundry';
 import './App.css';
 
+import { setSearchField } from '../actions';
 
-const App = forwardRef(() => {
-	const [state, setState] = useState({
-			robots: [],
-			searchField:''
-		});
+const mapStateToProps = state => {
+	return {
+		searchField: state.searchField
+	}
+}
+
+const mapDispatchToProps = (dispatch) => {
+	return {
+		onSearchChange: (event) => dispatch(setSearchField(event.target.value))
+	}
+}
+
+const App = ({searchField, onSearchChange}) => {
+	const [robots, setRobots] = useState([]);
 
 	 useEffect(() => {
 	    fetch('https://jsonplaceholder.typicode.com/users')
 			.then(resp => resp.json())
-			.then(users => setState((prevState) => {return { ...prevState, robots: users}}));
+			.then(users => setRobots(users));
 	  }, []);
-
-	const onSearchChange = (e) => {
-		setState((prevState) => { return {...prevState, searchField: e.target.value}});
-	}
-
-	const {robots, searchField} = state;
 
 	return !robots.length ? 
 		<h1>Loading</h1> :
@@ -37,6 +42,6 @@ const App = forwardRef(() => {
     		</Scroll>	
 		</div>
 		);
-});
+};
 
-export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(App);
